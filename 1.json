@@ -1,0 +1,30 @@
+{
+    "analysisId": "analysis_id", 
+    "analysisType": "analysis_type", 
+    "experiment": {
+        "aligned": false, 
+        "libraryStrategy": "libs", 
+        "referenceGenome": "ref"
+    }, 
+    "file": [
+        {
+            "fileAccess": "controlled", 
+            "fileMd5sum": "asum", 
+            "fileName": "aname", 
+            "fileSize": "100", 
+            "fileType": "atype"
+        }, 
+        {
+            "fileAccess": "controlled", 
+            "fileMd5sum": "asum", 
+            "fileName": "aname", 
+            "fileSize": "100", 
+            "fileType": "atype"
+        }
+    ], 
+    "info": {
+        "key1": "value1", 
+        "key2": "value2"
+    }, 
+    "sample": []
+}
