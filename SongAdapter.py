@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+
 import click
 import os
 import argparse
 import json
 import jsonschema
 from icgconnect.icgc import song
+from icgconnect.utils.file_utils import get_file_md5
+from icgconnect.utils.file_utils import get_file_size
 
 @click.group()
 def songadapter():
@@ -73,17 +77,32 @@ def add_experiment(input, aligned, library_strategy, reference_genome):
 @songadapter.command('add:file')
 @click.option('--input','-i', type=click.Path(exists=True),help="An existing song payload")
 @click.option('--access/--controlled', required=True, help="Access or Controlled")
-@click.option('--md5sum','-m', required=True, help="MD5 Checksum of the file")
-@click.option('--name','-n', required=True, help="Name of the file")
-@click.option('--size','-s', required=True, help="Size of the file")
+@click.option('--md5sum','-m', help="MD5 Checksum of the file")
+@click.option('--name','-n', type=click.Path(exists=True),required=True, help="Name of the file")
+@click.option('--size','-s', help="Size of the file")
 @click.option('--type','-t', required=True, help="Type of the file")
 def add_file(input, access, md5sum, name,size, type):
     """Add file to the payload"""
     if access: _access = 'open'
     else: _access = 'controlled'
 
+    if not md5sum == None:
+        _md5_sum = md5sum
+    else:
+        _md5_sum = get_file_md5(name)
+
+    if not name == None:
+        _name = os.path.basename(name)
+    else:
+        _name = name
+
+    if not size == None:
+        _size = size
+    else:
+        _size = get_file_size(name)
+
     json_load = json.load(open(input))
-    _file = {'fileAccess':_access,'fileMd5sum':md5sum,'fileName':name,'fileSize':int(size),'fileType':type}
+    _file = {'fileAccess':_access,'fileMd5sum':_md5_sum,'fileName':_name,'fileSize':int(_size),'fileType':type}
     json_load['file'].append(_file)
     save_json(json_load, input)
 
