@@ -57,3 +57,8 @@ python SongAdapter.py add:info --input payload.json --key <INFO_KEY> --value <IN
 ```bash
 python SongAdapter.py add:sample --input payload.json --donor-gender <GENDER> --donor-submitter-id <SUBMITTER_ID> --sample-submitter-id <S_SUBMITTER_ID> --sample-type <TYPE> --specimen-class <CLASS> --specimen-submitter-id <SUBMITTER_ID> --specimen-type <SPECIMEN_TYPE>
 ```
+
+### Validate
+```bash
+python SongAdapter.py validate --input payload.json
+```

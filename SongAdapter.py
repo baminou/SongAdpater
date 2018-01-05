@@ -2,7 +2,7 @@ import click
 import os
 import argparse
 import json
-from jsonschema import validate
+import jsonschema
 from icgconnect.icgc import song
 
 @click.group()
@@ -83,7 +83,7 @@ def add_file(input, access, md5sum, name,size, type):
     else: _access = 'controlled'
 
     json_load = json.load(open(input))
-    _file = {'fileAccess':_access,'fileMd5sum':md5sum,'fileName':name,'fileSize':size,'fileType':type}
+    _file = {'fileAccess':_access,'fileMd5sum':md5sum,'fileName':name,'fileSize':int(size),'fileType':type}
     json_load['file'].append(_file)
     save_json(json_load, input)
 
@@ -104,14 +104,14 @@ def add_info(input, key, value):
 @click.option('--donor-submitter-id',required=True, help="Submitter ID of the donor")
 @click.option('--sample-submitter-id',required=True, help="Submitter sample ID")
 @click.option('--sample-type',required=True, help="Sample type")
-@click.option('--specimen-class',required=True, help="Specimen class")
+@click.option('--specimen-class',required=True, help="Specimen class (Normal, Tumour or Adjacent normal)")
 @click.option('--specimen-submitter-id',required=True, help='Specimen submitter ID')
 @click.option('--specimen-type',required=True, help='Specimen type')
 def add_sample(input, donor_gender, donor_submitter_id, sample_submitter_id,sample_type,specimen_class,specimen_submitter_id,specimen_type):
     """Add sample to the payload"""
     json_load = json.load(open(input))
     _donor = {'donorGender':donor_gender,'donorSubmitterId':donor_submitter_id}
-    _specimen = {'specimenClass':specimen_class,'specimenSubmitterId':specimen_submitter_id,'specimentType':specimen_type}
+    _specimen = {'specimenClass':specimen_class,'specimenSubmitterId':specimen_submitter_id,'specimenType':specimen_type}
     json_load['sample'].append({
         'donor':_donor,
         'sampleSubmitterId': sample_submitter_id,
@@ -121,12 +121,21 @@ def add_sample(input, donor_gender, donor_submitter_id, sample_submitter_id,samp
 
     save_json(json_load, input)
 
+@songadapter.command('validate')
+@click.option('--input','-i', type=click.Path(exists=True),help="An existing song payload")
+def validate(input):
+    """Validate the json payload"""
+    json_load = json.load(open(input))
+    try:
+        jsonschema.validate(json_load,song.get_schema())
+    except Exception, err:
+        print str(err)
+        exit(1)
+
 def save_json(json_string, output_file):
     with open(output_file, 'w') as f:
         f.writelines(json.dumps(json_string, indent=4, sort_keys=True))
 
-def validate_json(json_schema, json_string):
-    return validate(json_string, json_schema)
-
 if __name__ == '__main__':
     songadapter()
+
