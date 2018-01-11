@@ -2,9 +2,7 @@
 
 import click
 import os
-import argparse
 import json
-import jsonschema
 from icgconnect.icgc import song
 from icgconnect.utils.file_utils import get_file_md5
 from icgconnect.utils.file_utils import get_file_size
@@ -57,9 +55,9 @@ def add_analysis_type(input, type):
     json_load['analysisType'] = type
     save_json(json_load, input)
 
-@songadapter.command('add:experiment')
+@songadapter.command('add:bam:experiment')
 @click.option('--input','-i', type=click.Path(exists=True),help="An existing song payload")
-@click.option('--aligned/--unaligned',required=True, help="Aligned or unaligned experiment")
+@click.option('--aligned/--unaligned', required=True, help="Aligned or unaligned experiment")
 @click.option('--library-strategy','-l', required=True, help="Library strategy")
 @click.option('--reference-genome','-r', required=True, help="Reference genome")
 def add_experiment(input, aligned, library_strategy, reference_genome):
@@ -71,6 +69,23 @@ def add_experiment(input, aligned, library_strategy, reference_genome):
 
     json_load['experiment']['libraryStrategy'] = library_strategy
     json_load['experiment']['referenceGenome'] = reference_genome
+
+    save_json(json_load, input)
+
+@songadapter.command('add:fastq:experiment')
+@click.option('--input','-i', type=click.Path(exists=True),help="An existing song payload")
+@click.option('--insert-size', '-is', help="Insert size of experiment")
+@click.option('--library-strategy','-l', required=True, help="Library strategy")
+@click.option('--paired-end/--non-paired-end','-r', required=True, help="Paired end")
+def add_experiment(input, insert_size, library_strategy, paired_end):
+    """Add experiment to the payload"""
+    json_load = json.load(open(input))
+
+    if paired_end: json_load['experiment']['pairedEnd'] = True
+    else: json_load['experiment']['pairedEnd'] = False
+
+    json_load['experiment']['libraryStrategy'] = library_strategy
+    json_load['experiment']['insertSize'] = insert_size
 
     save_json(json_load, input)
 
@@ -146,7 +161,7 @@ def validate(input):
     """Validate the json payload"""
     json_load = json.load(open(input))
     try:
-        jsonschema.validate(json_load,song.get_schema())
+        song.validate_schema(json_load)
     except Exception, err:
         print str(err)
         exit(1)
